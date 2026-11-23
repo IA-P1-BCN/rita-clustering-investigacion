@@ -1,5 +1,6 @@
-# rita-clustering-investigacion
-Investigación y desarrollo sobre algoritmos de clustering no supervisados
+# Investigación sobre algoritmos de clustering no supervisados
+
+Autora: Rita Pereira · Bootcamp de Inteligencia Artificial · Noviembre 202
 
 **1. ¿Qué es el aprendizaje no supervisado y qué es un algoritmo de clustering? ¿En qué se diferencia del aprendizaje supervisado y cuál es su propósito?**
 
