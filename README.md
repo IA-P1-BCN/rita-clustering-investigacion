@@ -21,3 +21,9 @@ Algunas aplicaciones reales del clustering:
 
 **2. Explique la diferencia conceptual entre el clustering basado en centroides (particional) y el clustering jerárquico, mencionando un algoritmo representativo de cada enfoque.**
 
+
+
+
+## Bibliografía
+
+- scikit-learn developers. *2.3. Clustering*. scikit-learn documentation. https://scikit-learn.org/stable/modules/clustering.html
