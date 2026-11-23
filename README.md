@@ -21,6 +21,22 @@ Algunas aplicaciones reales del clustering:
 
 **2. Explique la diferencia conceptual entre el clustering basado en centroides (particional) y el clustering jerárquico, mencionando un algoritmo representativo de cada enfoque.**
 
+La diferencia entre los dos enfoques está en cómo construyen los grupos y en qué tengo que decidir antes de empezar.
+
+El clustering basado en centroides, o particional, divide los datos en un número de grupos que fijo de antemano. Su algoritmo representativo es K-Means. Primero elijo K, que es el número de grupos. El algoritmo coloca K centroides al azar y asigna cada punto al centroide más cercano. Después mueve cada centroide al centro de los puntos que le han tocado y repite el proceso hasta que dejan de moverse. El resultado es una única división de los datos en K grupos, y como el punto de partida es aleatorio, dos ejecuciones pueden dar resultados algo distintos.
+
+El clustering jerárquico no necesita que fije el número de grupos al principio. Su algoritmo representativo es el jerárquico aglomerativo. Empieza con cada punto como su propio grupo y va uniendo los dos grupos más cercanos hasta que todo queda en uno solo. El resultado es un dendrograma, un árbol con todas las uniones, y obtengo los grupos cortándolo a la altura que quiera. Aquí sí tengo que decidir cómo mido la distancia entre grupos, lo que se llama criterio de enlace o linkage. Ward, que une los grupos cuya fusión aumenta menos la variación interna, es el más usado y el que scikit-learn aplica por defecto.
+
+Las dos formas se llevan bien con casos distintos. Según la guía de scikit-learn, K-Means escala a muestras muy grandes y a un número medio de clusters, y es de uso general con grupos de tamaño parecido y geometría plana. El aglomerativo maneja muchos clusters, admite restricciones de conectividad y distancias no euclídeas, y es más lento cuando crece el número de datos. Otra diferencia es que K-Means es inductivo, así que puede asignar un punto nuevo a un grupo sin repetir el proceso, y el aglomerativo es transductivo, así que si llegan datos nuevos hay que volver a calcularlo.
+
+Un ejemplo de por qué importa el enfoque: con dos medias lunas entrelazadas, K-Means falla porque asigna cada punto al centro más cercano y corta las lunas por la mitad. El aglomerativo con linkage single sí puede separarlas, porque une los puntos más cercanos entre sí y sigue la curva de cada luna.
+
+Resumiendo, K-Means pide K desde el inicio y devuelve una sola división, y el jerárquico no lo pide y devuelve un árbol con todos los niveles de agrupación.
+
+Fuente: scikit-learn developers, 2.3. Clustering (consultado el 23 de noviembre de 2026).
+
+**3. ¿En qué consiste el clustering basado en densidad (como DBSCAN) y cómo difiere su enfoque del clustering basado en centroides y del jerárquico?** 
+
 
 
 
