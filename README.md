@@ -38,9 +38,114 @@ Fuente: scikit-learn developers, 2.3. Clustering (consultado el 23 de noviembre 
 
 **3. ¿En qué consiste el clustering basado en densidad (como DBSCAN) y cómo difiere su enfoque del clustering basado en centroides y del jerárquico?** 
 
+El clustering basado en densidad agrupa los puntos según lo juntos que están, sin buscar centros. La idea es parecida a mirar un mapa con personas: las plazas llenas de gente son los grupos, y los paseantes sueltos de las calles vacías no pertenecen a ninguno.
 
+DBSCAN lo convierte en algoritmo con dos parámetros. El primero es eps, el radio con el que miro alrededor de cada punto. El segundo es min_samples, el número mínimo de puntos que debe haber dentro de ese radio. Según esto, cada punto cae en una de tres categorías:
 
+- **Punto core**: tiene al menos min_samples puntos dentro de su radio, así que está en una zona densa.
+- **Punto frontera (border)**: no cumple eso, pero está dentro del radio de un punto core, así que se une a su grupo.
+- **Ruido (noise)**: no es core y tampoco está cerca de ninguno, así que no pertenece a ningún grupo.
+
+Los grupos se forman encadenando puntos core que son vecinos entre sí. Por eso un grupo puede tener cualquier forma, incluidas curvas, anillos o medias lunas.
+
+La diferencia con los otros dos enfoques es clara:
+
+- **Frente a los centroides (K-Means)**: DBSCAN no necesita fijar el número de grupos, no busca centros y no obliga a que todos los puntos pertenezcan a un grupo. K-Means asume grupos redondeados y asigna cada punto al centro más cercano.
+- **Frente al jerárquico**: el jerárquico construye un árbol uniendo grupos por distancia y yo decido después dónde cortarlo. DBSCAN no construye ningún árbol, decide los grupos por densidad en una sola pasada y detecta el ruido por sí mismo.
+
+Su punto débil es que depende mucho de elegir bien eps y min_samples, y le cuesta cuando los grupos tienen densidades muy distintas.
+
+**4. ¿Por qué es importante elegir correctamente el número de clusters o los hiperparámetros de un algoritmo de clustering? Explica al menos dos métodos para evaluar la calidad de un agrupamiento (por ejemplo, el método del codo y el coeficiente de silueta).**
+
+En clustering no hay etiquetas correctas con las que comparar, así que elegir mal el número de clusters o los hiperparámetros cambia por completo el resultado sin que ningún error nos avise. Con K demasiado bajo mezclamos grupos distintos en uno solo. Con K demasiado alto partimos grupos naturales en trozos sin sentido. En DBSCAN, un eps pequeño convierte casi todo en ruido y uno grande junta todo en un único grupo. Por eso necesitamos métricas que nos ayuden a decidir.
+
+**Método del codo (elbow)**. Se ejecuta K-Means con distintos valores de K y se calcula en cada caso la inercia, que es la suma de las distancias al cuadrado de cada punto a su centroide. Al aumentar K la inercia siempre baja, porque los grupos son más pequeños. Se dibuja la inercia frente a K y se busca el "codo", el punto donde la mejora deja de ser grande. Ese K es una buena elección. Su límite es que a veces el codo no se ve con claridad.
+
+**Coeficiente de silueta**. Para cada punto se compara dos distancias: a, la distancia media a los demás puntos de su grupo, y b, la distancia media a los puntos del grupo más cercano que no es el suyo. La silueta es (b - a) / max(a, b) y va de -1 a 1. Un valor cercano a 1 indica que el punto está bien asignado, cerca de 0 que está en la frontera entre dos grupos, y negativo que probablemente está en el grupo equivocado. Se calcula la media de todos los puntos para cada K y se elige el K con la silueta más alta. A diferencia del codo, ofrece un número que se puede comparar, y también sirve con otros algoritmos además de K-Means.
+
+En la práctica uso las dos métricas junto con un gráfico de los datos, porque ninguna sustituye a mirar si los grupos tienen sentido.
+
+**5. Explica brevemente los siguientes algoritmos:**
+**- K-Means**
+**- Clustering Jerárquico (Aglomerativo)** 
+**- DBSCAN** 
+**- Gaussian Mixture Models (GMM)**
+
+K-Means
+
+Mecanismo: el usuario fija K. El algoritmo coloca K centroides, asigna cada punto al más cercano, recalcula cada centroide como el promedio de sus puntos y repite hasta que no cambian.
+
+Ventajas:
+
+Es sencillo y fácil de interpretar.
+Es rápido y escala a conjuntos muy grandes.
+Permite asignar puntos nuevos sin repetir el proceso.
+
+Desventajas:
+
+Hay que decidir K de antemano.
+Es sensible a la inicialización y a los valores atípicos.
+Asume grupos redondeados y de tamaño parecido, y falla con formas irregulares.
+Necesita variables escaladas.
+
+Casos de uso: segmentación de clientes, compresión de imágenes por reducción de colores y agrupación de documentos.
+
+Clustering jerárquico aglomerativo
+
+Mecanismo: cada punto empieza como su propio grupo y se van uniendo los dos grupos más cercanos según el criterio de enlace (Ward, complete, average o single). El resultado es un dendrograma que se corta a la altura deseada.
+
+Ventajas:
+
+No exige fijar K desde el principio.
+El dendrograma muestra la estructura a todos los niveles.
+Admite distintos criterios de enlace y distancias.
+
+Desventajas:
+
+Es más lento y consume más memoria cuando crece el número de datos.
+Una unión ya hecha no se deshace.
+El resultado depende del linkage elegido.
+No asigna puntos nuevos sin recalcular.
+
+Casos de uso: taxonomías en biología y genética, análisis exploratorio con pocos datos y organización de documentos por temas.
+
+DBSCAN
+
+Mecanismo: para cada punto cuenta los vecinos dentro de un radio eps. Si hay al menos min_samples, es un punto core y forma parte de una zona densa. Los grupos se construyen encadenando puntos core vecinos, y los puntos aislados se marcan como ruido.
+
+Ventajas:
+
+No requiere fijar el número de grupos.
+Encuentra grupos de forma arbitraria.
+Detecta valores atípicos como ruido.
+
+Desventajas:
+
+Es sensible a la elección de eps y min_samples.
+Le cuesta cuando los grupos tienen densidades muy distintas.
+Pierde eficacia en datos con muchas dimensiones.
+
+Casos de uso: detección de anomalías y fraude, agrupación de ubicaciones geográficas y limpieza de ruido en los datos.
+
+Gaussian Mixture Models (GMM)
+
+Mecanismo: supone que los datos vienen de una mezcla de distribuciones normales (gaussianas), una por grupo. Con el algoritmo EM (Expectation-Maximization) estima la media, la forma y el peso de cada una. En lugar de asignar cada punto a un solo grupo, calcula la probabilidad de que pertenezca a cada uno.
+
+Ventajas:
+
+Da asignaciones suaves, con probabilidades, y admite solapamiento entre grupos.
+Se adapta a grupos elípticos de distinto tamaño y orientación, no solo redondos.
+Permite elegir el número de componentes con criterios como BIC o AIC.
+
+Desventajas:
+
+Hay que decidir el número de componentes.
+Asume que los grupos son gaussianos.
+Puede converger a una solución local según la inicialización.
+Es más costoso que K-Means.
+
+Casos de uso: segmentación donde los perfiles se solapan, estimación de densidad y detección de anomalías.
 
 ## Bibliografía
 
-- scikit-learn developers. *2.3. Clustering*. scikit-learn documentation. https://scikit-learn.org/stable/modules/clustering.html
+- scikit-learn developers. *2.3. Clustering*. scikit-learn documentation. https://scikit-learn.org/stable/modules/clustering.html (consultado en noviembre de 2026).
